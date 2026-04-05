@@ -41,6 +41,7 @@ the `Owner` class manages user information and preferences, while the `Pet` clas
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+Yes, during implementation I realized that the `Scheduler` class needed to keep track of the owner's available time to generate a feasible plan. Initially, I had not included this attribute in the `Scheduler`, but I added it later to ensure that the scheduling logic could properly account for time constraints when selecting tasks. This change was necessary to make the scheduler more effective and realistic in generating daily plans that fit within the owner's available time.
 
 ---
 
