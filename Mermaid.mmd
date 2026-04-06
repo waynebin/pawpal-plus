@@ -1,39 +1,120 @@
 classDiagram
+    class PetType {
+        <<enumeration>>
+        DOG
+        CAT
+        RABBIT
+        BIRD
+    }
+
+    class Priority {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        HIGH
+        +weight() int
+    }
+
+    class TimeSlot {
+        <<enumeration>>
+        MORNING
+        AFTERNOON
+        EVENING
+        ANY
+    }
+
+    class Recurrence {
+        <<enumeration>>
+        DAILY
+        WEEKLY
+        AS_NEEDED
+    }
+
     class Owner {
         +String name
         +int available_minutes
+        +dict time_per_slot
         +dict preferences
         +set_available_time(minutes)
+        +set_slot_time(slot, minutes)
         +add_preference(key, value)
     }
 
     class Pet {
         +String name
-        +String species
+        +PetType pet_type
         +int age
         +Owner owner
-        +get_info() dict
+        +int hunger_level
+        +int happiness_level
+        +int energy_level
+        +feed()
+        +play()
+        +sleep()
+        +get_status() str
     }
 
     class Task {
-        +String title
+        +String task_id
+        +String description
+        +Pet pet
+        +datetime due_date
         +int duration_minutes
-        +String priority
-        +bool completed
+        +Priority priority
+        +bool is_completed
+        +TimeSlot time_slot
+        +Recurrence recurrence
+        +List dependencies
+        +bool is_required
+        +bool carry_over
         +mark_complete()
+        +mark_incomplete()
+        +update_due_date(new_date)
         +to_dict() dict
     }
 
     class Scheduler {
-        +list~Task~ tasks
+        +List~Task~ tasks
         +int available_minutes
+        +dict time_per_slot
         +Pet pet
         +add_task(task)
-        +remove_task(title)
-        +generate_plan() list~Task~
+        +remove_task(task_id)
+        +generate_plan() dict
+        +get_carry_over_tasks() list
+        +detect_conflicts() list
         +explain_plan() str
+        -_knapsack(tasks, capacity) list
+        -_resolve_dependencies(plan) list
+        -_state_adjusted_weight(task) int
     }
 
-    Owner "1" --> "1" Pet : owns
-    Pet "1" --> "1" Scheduler : scheduled by
-    Scheduler "1" o-- "many" Task : manages
+    class PawPalSystem {
+        +List~Pet~ pets
+        +List~Task~ tasks
+        +Scheduler scheduler
+        +add_pet(pet)
+        +remove_pet(pet_name)
+        +get_pet(pet_name) Pet
+        +get_all_pets() list
+        +add_task(task)
+        +remove_task(task_id)
+        +get_all_tasks() list
+        +get_pet_tasks(pet_name) list
+        +build_schedule(pet_name) Scheduler
+        +update_pet_status(pet_name, h, hap, e)
+    }
+
+    Owner "1" --> "1..*" Pet : owns
+    Pet "1" --> "1" Owner : belongs to
+    Pet ..> PetType : uses
+    Task "1" --> "1" Pet : assigned to
+    Task ..> Priority : uses
+    Task ..> TimeSlot : uses
+    Task ..> Recurrence : uses
+    Task "0..*" --> "0..*" Task : depends on
+    Scheduler "1" o-- "0..*" Task : manages
+    Scheduler --> "1" Pet : schedules for
+    PawPalSystem "1" *-- "0..*" Pet : owns
+    PawPalSystem "1" *-- "0..*" Task : owns
+    PawPalSystem "1" --> "0..1" Scheduler : builds
